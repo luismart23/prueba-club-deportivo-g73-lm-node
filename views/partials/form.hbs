@@ -1,0 +1,31 @@
+<div class="container">
+
+    <h1>Deportes</h1>
+    <form id="formAddDeporte" class="border rounded p-4">
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Nombre</label>
+            <div class="col-sm-10">
+                <input id="nombre" type="text" class="form-control" name="nombre" />
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Precio</label>
+            <div class="col-sm-10">
+                <input id="precio" type="text" class="form-control" name="precio" />
+            </div>
+        </div>
+        <button type="submit" class="btn btn-info">Agregar</button>
+    </form>
+</div>
+
+<h5 class="text-center my-4">Tabla de deportes registrados</h5>
+<table class="table w-25 m-auto border">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Precio</th>
+        </tr>
+    </thead>
+    <tbody id="cuerpoDOM"></tbody>
+</table>
