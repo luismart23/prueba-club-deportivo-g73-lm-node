@@ -1,41 +1,51 @@
 import express from 'express';
-import { engine } from 'express-handlebars';
 import router from './routes/deporte.route.js';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 
 const app = express();
 
-// Ruta absoluta del directorio actual
-const __dirname = path.resolve();
+// Ruta absoluta
+const __dirname = import.meta.dirname
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Ruta estática para los archivos en la carpeta 'public'
-app.use(express.static(__dirname + '/public'));
-app.use('/assets/js', express.static(__dirname + '/node_modules/axios/dist/'));
-app.use('/assets/js', express.static(__dirname + '/node_modules/bootstrap/dist/css'));
-app.use('/assets/js', express.static(__dirname + '/node_modules/bootstrap/dist/js/'));
+const publicPath = path.join(__dirname, 'public');
+app.use(express.static(publicPath));
 
-// Configuración de Handlebars como motor de plantillas
-app.set('view engine', '.hbs');
-app.set('views', path.join(__dirname, 'views'));
-app.engine('.hbs', engine({
-    layoutsDir: path.join(__dirname, 'views', 'layouts'),
-    partialsDir: path.join(__dirname, 'views', 'partials')
-}));
-
+// Ruta para renderizar la página HTML de deportes
 app.get('/', (req, res) => {
-    return res.render('layouts/main');
-})
+    // Ruta absoluta del archivo HTML
+    const htmlFilePath = path.join(publicPath, 'club.deportivo.html');
 
+    // Verificar si el archivo HTML existe
+    fs.access(htmlFilePath, fs.constants.F_OK, (err) => {
+        if (err) {
+            console.error('El archivo HTML no existe:', err);
+            res.status(404).send('No se encontró el archivo HTML');
+        } else {
+            res.sendFile(htmlFilePath, (err) => {
+                if (err) {
+                    console.error('Error al enviar el archivo HTML:', err);
+                    res.status(500).send('Error interno del servidor');
+                } else {
+                    console.log('Archivo HTML enviado correctamente');
+                }
+            });
+        }
+    });
+});
 
 // Rutas de la API para los deportes
-app.use('/api/v1/deportes', router); // Cambio aquí: usar el enrutador importado con el nombre correcto
+app.use('/api/v1/deportes', router);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Example app listening on PORT ${PORT}`);
 });
+
+

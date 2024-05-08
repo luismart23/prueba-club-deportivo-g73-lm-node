@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Club Deportivo</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+</head>
+
+<body>
+
+    <div class="container">
+        <h1 class="my-4">Deportes</h1>
+        <div class="border rounded p-4">
+            <div class="form-group row">
+                <label for="nombre" class="col-sm-2 col-form-label">Nombre</label>
+                <div class="col-sm-10">
+                    <input id="nombre" type="text" class="form-control" name="nombre">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="precio" class="col-sm-2 col-form-label">Precio</label>
+                <div class="col-sm-10">
+                    <input id="precio" type="text" class="form-control" name="precio">
+                </div>
+            </div>
+            <button class="btn btn-info" onclick="agregar()">Agregar</button>
+        </div>
+    </div>
+
+    <h5 class="text-center my-4">Tabla de deportes registrados</h5>
+    <table class="table w-25 m-auto border">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nombre</th>
+                <th scope="col">Precio</th>
+                <th scope="col">Acciones</th> <!-- Agregamos una columna para acciones -->
+            </tr>
+        </thead>
+        <tbody id="cuerpo"></tbody>
+    </table>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Editar deporte</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <label for="nombreModal" class="col-sm-2 col-form-label">Nombre</label>
+                        <div class="col-sm-10">
+                            <input id="nombreModal" type="text" class="form-control" name="nombre">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="precioModal" class="col-sm-2 col-form-label">Precio</label>
+                        <div class="col-sm-10">
+                            <input id="precioModal" type="text" class="form-control" name="precio">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input id="uidModal" type="hidden"> <!-- Campo oculto para almacenar el UID -->
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button class="btn btn-warning" onclick="edit()">Guardar cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.js"
+        integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            getData();
+        });
+
+        function getData() {
+            $('#cuerpo').html('');
+            axios.get('/api/v1/deportes').then((response) => { // Cambiamos data por response
+                const deportes = response.data; // Cambiamos data.data por response.data
+                deportes.forEach((d, i) => {
+                    $('#cuerpo').append(`
+    <tr>
+        <th scope="row">${i + 1}</th>
+        <td>${d.nombre}</td>
+        <td>${d.precio}</td>
+        <td>
+            <button class="btn btn-warning" onclick='preEdit("${d.uid}", "${d.nombre}", "${d.precio}")' data-toggle="modal"
+                data-target="#exampleModal">Editar</button> <!-- Pasamos uid en lugar de nombre -->
+            <button class="btn btn-danger" onclick='eliminar("${d.uid}")'>Eliminar</button> <!-- Pasamos uid en lugar de nombre -->
+        </td>
+    </tr>
+    `);
+                });
+            });
+        }
+
+        function preEdit(uid, nombre, precio) { // Agregamos el parámetro uid
+            $('#nombreModal').val(nombre);
+            $('#precioModal').val(precio);
+            $('#uidModal').val(uid); // Agregamos el valor de uid al campo oculto
+        }
+
+        function agregar() {
+            const nombre = $('#nombre').val();
+            const precio = $('#precio').val();
+            axios.post('/api/v1/deportes', { nombre, precio }).then((response) => { // Utilizamos POST para agregar
+                alert(response.data.message); // Mostramos el mensaje del servidor
+                getData();
+            }).catch(error => {
+                console.error('Error al agregar deporte:', error.response.data.error);
+                alert('Error al agregar deporte: ' + error.response.data.error);
+            });
+            $('#exampleModal').modal('hide');
+        }
+
+        function edit() {
+            const uid = $('#uidModal').val(); // Obtenemos el uid del campo oculto
+            const nombre = $('#nombreModal').val();
+            const precio = $('#precioModal').val();
+            axios.put(`/api/v1/deportes/${uid}`, { nombre, precio }).then((response) => { // Utilizamos PUT para editar
+                alert(response.data.message); // Mostramos el mensaje del servidor
+                getData();
+            }).catch(error => {
+                console.error('Error al editar deporte:', error.response.data.error);
+                alert('Error al editar deporte: ' + error.response.data.error);
+            });
+            $('#exampleModal').modal('hide');
+        }
+
+        function eliminar(uid) { // Pasamos uid como parámetro
+            axios.delete(`/api/v1/deportes/${uid}`).then((response) => { // Utilizamos DELETE para eliminar
+                alert(response.data.message); // Mostramos el mensaje del servidor
+                getData();
+            }).catch(error => {
+                console.error('Error al eliminar deporte:', error.response.data.error);
+                alert('Error al eliminar deporte: ' + error.response.data.error);
+            });
+            $('#exampleModal').modal('hide');
+        }
+    </script>
+
+
+</body>
+
+</html>

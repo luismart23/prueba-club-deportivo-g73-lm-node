@@ -1,0 +1,22 @@
+[
+    {
+        "uid": "oNbGMVR4IxWoBbTIvLHzE",
+        "nombre": "Ciclismo",
+        "precio": "9000"
+    },
+    {
+        "uid": "b8kz8T8fc9a8r3wT067DV",
+        "nombre": "Tenis",
+        "precio": "7000"
+    },
+    {
+        "uid": "k-XC7OVijVHOuWKf01G1n",
+        "nombre": "Natación",
+        "precio": "10000"
+    },
+    {
+        "uid": "CK4c15IlerfLqE9z3wqqT",
+        "nombre": "Futbol",
+        "precio": "6000"
+    }
+]
